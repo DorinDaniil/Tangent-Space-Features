@@ -1,5 +1,5 @@
 <div align="center">
-<h1>Tangent-Space Features of Covariance Matrices of Multivariate Time Series: Invariance, Distance Distortion and Covariance Estimation Noise</h1>
+<h1>Explicit Bounds for Tangent-Space Features of Covariance Matrices of Multivariate Time Series</h1>
 
 [Daniil Dorin](https://github.com/DorinDaniil)<sup>1 :email:</sup>
 
@@ -8,6 +8,8 @@
 <sup>:email:</sup> Corresponding author
 
 [📝 Paper](#-citation), [</> Code](https://github.com/DorinDaniil/Tangent-Space-Features/tree/main/code)
+
+![overview](assets/riemann_scheme.png)
 
 </div>
 
@@ -52,7 +54,7 @@ python code/eeg_check/bci2a_check.py
 The paper is under review; the citation will be updated upon publication.
 ```BibTeX
 @article{dorin2026tangent,
-  title={Tangent-space features of covariance matrices of multivariate time series: invariance, distance distortion and covariance estimation noise},
+  title={Explicit bounds for tangent-space features of covariance matrices of multivariate time series},
   author={Dorin, Daniil},
   year={2026}
 }

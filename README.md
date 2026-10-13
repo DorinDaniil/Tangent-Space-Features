@@ -1,5 +1,5 @@
 <div align="center">
-<h1>Explicit Bounds for Tangent-Space Covariance Features in the Classification of Multivariate Time Series</h1>
+<h1>Explicit Bounds for Tangent-Space Features of Covariance Matrices of Multivariate Time Series</h1>
 
 [Daniil Dorin](https://github.com/DorinDaniil)<sup>1 :email:</sup>
 
@@ -14,7 +14,7 @@
 </div>
 
 ## 💡 Abstract
-Multivariate time series are classified by the covariance matrices of their channels. Each covariance is projected onto the tangent space of the manifold of positive definite matrices at the Riemannian mean of the sample, and the projection coordinates serve as features of a linear classifier. Three properties of these features are proved with explicit constants. The features are invariant to the units of measurement and to nonsingular mixing of the channels up to an orthogonal rotation that leaves a regularized logistic regression unchanged. Euclidean distances between the features never exceed the geodesic distances between the covariances and differ from them by at most a sharp factor determined by the spectral spread of the tangent vectors. The geodesic error of the sample covariance has a distribution independent of the true covariance and admits a nonasymptotic bound. Experiments on synthetic data and EEG recordings confirm that the bounds are conservative.
+A multivariate time series is described by the covariance matrix of its channels, projected onto the tangent space of the manifold of symmetric positive definite matrices at the Riemannian mean of the sample; the coordinates of the projection serve as features for a linear classifier. Three properties of this construction are proved. The features are invariant to the units of measurement and to any nonsingular mixing of the channels up to an orthogonal rotation that does not change the output of a regularized logistic regression. Euclidean distances between the features never exceed the geodesic distances between the covariances and differ from them by at most an explicit factor depending only on the largest spectral spread of the tangent vectors; the constant is sharp but is not attained on any pair of distinct objects. The geodesic error of a covariance estimated from a finite number of samples has a distribution independent of the true covariance and is bounded with high probability by a quantity of order of the number of channels over the square root of the number of samples. Experiments on synthetic data and public EEG recordings confirm that the bounds are conservative.
 
 ## 🛠️ Repository Structure
 The repository is structured as follows:
@@ -54,7 +54,7 @@ python code/eeg_check/bci2a_check.py
 The paper is under review; the citation will be updated upon publication.
 ```BibTeX
 @article{dorin2026tangent,
-  title={Explicit bounds for tangent-space covariance features in the classification of multivariate time series},
+  title={Explicit bounds for tangent-space features of covariance matrices of multivariate time series},
   author={Dorin, Daniil},
   year={2026}
 }

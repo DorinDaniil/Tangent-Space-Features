@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Check of the three statements on the BCI Competition IV 2a EEG data set (BNCI 001-2014): left- vs right-hand
-motor imagery, 22 channels, 250 Hz, training sessions A01T-A03T. For each subject:
+motor imagery, 22 channels, 250 Hz, training sessions A01T-A09T. For each subject:
   1) invariance: a random nonsingular channel mixing A = G + 2I leaves the TSM accuracy and the pairwise feature
      distances unchanged;
   2) distance distortion: the ratio of the geodesic to the Euclidean distance over all pairs of trials against the
@@ -9,8 +9,9 @@ motor imagery, 22 channels, 250 Hz, training sessions A01T-A03T. For each subjec
   3) covariance estimation noise: the geodesic distance between the covariance of the first T' samples of a trial and
      the covariance of the full window against sqrt(h(h+1)/T') and the bound at confidence level 0.95; TSM accuracy
      for short windows.
-Data: A01T.mat, A02T.mat, A03T.mat (BNCI Horizon 2020 data set 001-2014) in the folder bci2a next to the script or in
-the folder given by the environment variable BCI2A_DIR; mirror: https://lampx.tugraz.at/~bci/database/001-2014/"""
+Data: A01T.mat ... A09T.mat (BNCI Horizon 2020 data set 001-2014) in the folder bci2a next to the script or in
+the folder given by the environment variable BCI2A_DIR; a subset of subjects can be selected with BCI2A_SUBJECTS
+(for example "1,2,3"); mirror: https://lampx.tugraz.at/~bci/database/001-2014/"""
 import os, sys, json, math, warnings
 import numpy as np
 from scipy.io import loadmat
@@ -22,10 +23,10 @@ import synthetic_experiments as se
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.environ.get("BCI2A_DIR", os.path.join(HERE, "bci2a"))
-for _s in (1, 2, 3):
+SUBJECTS = [int(s) for s in os.environ.get("BCI2A_SUBJECTS", "1,2,3,4,5,6,7,8,9").split(",")]
+for _s in SUBJECTS:
     if not os.path.isfile(os.path.join(DATA, f"A0{_s}T.mat")):
         sys.exit(f"A0{_s}T.mat not found in {DATA}: download it from https://lampx.tugraz.at/~bci/database/001-2014/")
-SUBJECTS = [1, 2, 3]
 FS = 250
 T0, T1 = 2.5, 6.0                       # window after the trial onset (cue at 2 s): 3.5 s = 875 samples
 CH22 = ["Fz", "FC3", "FC1", "FCz", "FC2", "FC4", "C5", "C3", "C1", "Cz", "C2", "C4", "C6",

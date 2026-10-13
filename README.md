@@ -45,7 +45,7 @@ Install the dependencies and run the synthetic experiments:
 pip install -r requirements.txt
 python code/synthetic_experiments.py
 ```
-The EEG check needs the training sessions `A01T.mat`, `A02T.mat`, `A03T.mat` of BCI Competition IV 2a (BNCI Horizon 2020 dataset 001-2014). Download them, for example from the mirror https://lampx.tugraz.at/~bci/database/001-2014/, into `code/eeg_check/bci2a` (or set the environment variable `BCI2A_DIR`) and run
+The EEG check needs the training sessions `A01T.mat`, ..., `A09T.mat` of the nine subjects of BCI Competition IV 2a (BNCI Horizon 2020 dataset 001-2014). Download them, for example from the mirror https://lampx.tugraz.at/~bci/database/001-2014/, into `code/eeg_check/bci2a` (or set the environment variable `BCI2A_DIR`; a subset of subjects can be selected with `BCI2A_SUBJECTS`, for example `1,2,3`) and run
 ```shell
 python code/eeg_check/bci2a_check.py
 ```

@@ -1,26 +1,23 @@
-"""
-Синтетические эксперименты к статье о касательных признаках ковариационных матриц.
+"""Synthetic experiments for tangent-space covariance features.
 
-Эксперимент 1. Два класса ковариационных матриц на многообразии SPD(h): классы задаются
-геодезически гауссовыми облаками вокруг двух центров, разнесенных вдоль фиксированного
-касательного направления. Все масштабы облака пропорциональны параметру s, так что
-задача в касательных координатах центра класса не меняется, а меняется только радиус
-облака на многообразии. Сравниваются классификаторы:
-  * TSM + логистическая регрессия (проекция в точке риманова среднего выборки);
-  * log-Euclidean + логистическая регрессия (проекция в точке I, «неверная» опорная точка);
-  * Euclidean + логистическая регрессия (векторизация самой ковариации);
-  * MDM (ближайшее риманово среднее класса по геодезическому расстоянию).
-Дополнительно по всем парам обучающих объектов измеряется искажение расстояний
-delta_R(R_i, R_j) / ||p_i - p_j||_2 в сравнении с границами c(rho) (по радиусу облака) и
-g(omega) (по спектральному разбросу касательных векторов), и проверяется инвариантность
-TSM к преобразованию R -> A R A^T.
+Experiment 1. Two classes of covariance matrices on the SPD manifold: geodesically Gaussian clouds around two centers
+separated along a fixed tangent direction. All scales of the cloud are proportional to the parameter s, so the problem
+in the tangent coordinates of the class center stays the same and only the cloud radius on the manifold changes.
+Classifiers:
+  * TSM + logistic regression (projection at the Riemannian mean of the sample);
+  * log-Euclidean + logistic regression (projection at the identity, a misplaced reference point);
+  * Euclidean + logistic regression (vectorization of the covariance itself);
+  * MDM (nearest class Riemannian mean in the geodesic distance).
+The distance distortion delta_R(R_i, R_j) / ||p_i - p_j||_2 over all pairs of training objects is compared with the
+bounds c(rho) (cloud radius) and g(omega) (spectral spread of the tangent vectors), and the invariance of TSM under
+R -> A R A^T is checked.
 
-Эксперимент 1а. Неулучшаемость константы: для пары касательных векторов с собственными
-значениями +-rho/sqrt(2), повернутых друг относительно друга на угол theta, отношение
-delta_R / ||p_i - p_j||_2 стремится к c(rho) при theta -> 0, оставаясь строго меньше c(rho).
+Experiment 1a. Sharpness of the constant: for a pair of tangent vectors with eigenvalues +-rho/sqrt(2) whose
+eigenbases are rotated by the angle theta, the ratio delta_R / ||p_i - p_j||_2 tends to c(rho) as theta -> 0 while
+staying strictly below c(rho).
 
-Эксперимент 2. Шум оценивания: истинные ковариации заменяются выборочными по T отсчетам,
-измеряется точность TSM и ошибка delta_R(R_hat, R) в сравнении с оценкой теоремы.
+Experiment 2. Estimation noise: the true covariances are replaced by sample covariances from T samples; the accuracy
+of TSM and the error delta_R(R_hat, R) are compared with the bound of the theorem.
 """
 import numpy as np
 from scipy.linalg import eigh
@@ -49,7 +46,7 @@ def geo_dist(A, B):
     return np.linalg.norm(mlog(Ai @ B @ Ai), "fro")
 
 def pairwise_geo(Rs):
-    """Матрица геодезических расстояний между всеми парами (пакетное eigvalsh)."""
+    """Pairwise geodesic distance matrix (batched eigvalsh)."""
     n = len(Rs); D = np.zeros((n, n))
     for i in range(n - 1):
         Ai = misqrt(Rs[i])
@@ -86,12 +83,12 @@ def karcher_mean(Rs, iters=60, step=0.5, tol=1e-10):
     return R
 
 def random_sym(rng, h):
-    """Случайная симметричная матрица Z: координаты vec_sqrt2(Z) независимы и N(0,1)."""
+    """Random symmetric matrix Z whose coordinates vec_sqrt2(Z) are independent N(0,1)."""
     G = rng.standard_normal((h, h))
     return (G + G.T) / 2.0
 
 def g_fun(x):
-    """g(x) = sinh(x/2)/(x/2): множитель искажения леммы о дифференциале экспоненты."""
+    """g(x) = sinh(x/2)/(x/2), the stretch factor of the differential of the matrix exponential."""
     x = np.asarray(x, dtype=float)
     out = np.ones_like(x); m = np.abs(x) > 1e-12
     out[m] = np.sinh(x[m] / 2.0) / (x[m] / 2.0)
@@ -101,13 +98,13 @@ def c_rho(rho):
     return g_fun(np.sqrt(2.0) * np.asarray(rho, dtype=float))
 
 def spread(S):
-    """omega(S) = lambda_max - lambda_min = log числа обусловленности exp(S)."""
+    """omega(S) = lambda_max - lambda_min, the log condition number of exp(S)."""
     w = np.linalg.eigvalsh(S)
     return w[-1] - w[0]
 
 # ---------------------------------------------------------------- plot style
 def plot_style():
-    """Подписи рисунков набираются pdflatex (backend pgf): шрифты совпадают со шрифтами статьи."""
+    """Figure labels are typeset by pdflatex through the pgf backend."""
     plt.rcParams.update({
         "pgf.texsystem": "pdflatex", "pgf.rcfonts": False,
         "pgf.preamble": "\n".join([r"\usepackage[utf8]{inputenc}", r"\usepackage[T2A]{fontenc}",
@@ -119,18 +116,18 @@ def plot_style():
     })
 
 def savefig(fig, path):
-    """Сохраняет рисунок через pgf (LaTeX-шрифты); сам объект fig остается доступен для показа."""
+    """Save a figure through the pgf backend (LaTeX fonts)."""
     fig.savefig(path, backend="pgf", bbox_inches="tight", pad_inches=0.02)
 
 # ---------------------------------------------------------------- data model
 def sample_problem(rng, h):
-    """Случайная опорная точка R0 = exp(Z0) и единичное направление разделения классов U."""
+    """Random reference point R0 = exp(Z0) and unit class-separation direction U."""
     R0 = exp_at(np.eye(h), random_sym(rng, h))
     U = random_sym(rng, h); U /= np.linalg.norm(U, "fro")
     return R0, U
 
 def make_dataset(rng, h, s, n_per_class, R0, U, noise_ratio=2.0):
-    """Два класса: центры Exp_{R0}(+-s/2 U), объекты Exp_{center}(sigma Z), sigma = s/noise_ratio."""
+    """Two classes: centers Exp_{R0}(+-s/2 U), objects Exp_{center}(sigma Z), sigma = s/noise_ratio."""
     sigma = s / noise_ratio
     centers = [exp_at(R0, +0.5 * s * U), exp_at(R0, -0.5 * s * U)]
     X, y = [], []
@@ -155,8 +152,8 @@ def feats_euc(Rtr, Rte):
             np.array([vec_sqrt2(X) for X in Rte]))
 
 def lr_acc(Ftr, ytr, Fte, yte):
-    # общий скалярный масштаб признаков (не покоординатная стандартизация): регуляризация
-    # логистической регрессии действует одинаково при любом масштабе облака
+    # common scalar scale of the features (no coordinatewise standardization): the regularization
+    # of the logistic regression then acts identically at any scale of the cloud
     scale = np.mean(np.linalg.norm(Ftr - Ftr.mean(axis=0), axis=1))
     clf = LogisticRegression(C=1.0, max_iter=5000)
     clf.fit(Ftr / scale, ytr)
@@ -186,22 +183,22 @@ def experiment_radius(h=8, n_train=100, n_test=500, seeds=10,
             d = np.array([geo_dist(Rm, X) for X in Rtr])
             stat["rho95"].append(np.quantile(d, 0.95)); stat["rho_max"].append(d.max())
             stat["c_rho"].append(c_rho(d.max()))
-            # спектральный разброс касательных векторов и уточненная граница g(omega)
+            # spectral spread of the tangent vectors and the refined bound g(omega)
             om = np.array([spread(log_at(Rm, X)) for X in Rtr])
             stat["omega_max"].append(om.max()); stat["c_omega"].append(g_fun(om.max()))
-            # искажение расстояний по всем парам обучающих объектов
+            # distance distortion over all pairs of training objects
             Dg = pairwise_geo(Rtr)[iu]; De = pairwise_euc(Ftr)[iu]
             ratio = Dg / De
             stat["ratio_min"].append(ratio.min()); stat["ratio_med"].append(np.median(ratio))
             stat["ratio_q99"].append(np.quantile(ratio, 0.99)); stat["ratio_max"].append(ratio.max())
-            # попарная граница g(max(omega_i, omega_j)): отношение к ней должно быть < 1
+            # pairwise bound g(max(omega_i, omega_j)): the ratio to it must be < 1
             stat["pair_frac"].append(np.max(ratio / g_fun(np.maximum(om[:, None], om[None, :])[iu])))
             Ftr2, Fte2 = feats_logeuc(Rtr, Rte)
             acc["logeuc"].append(lr_acc(Ftr2, ytr, Fte2, yte))
             Ftr2, Fte2 = feats_euc(Rtr, Rte)
             acc["euc"].append(lr_acc(Ftr2, ytr, Fte2, yte))
             acc["mdm"].append(mdm_acc(Rtr, ytr, Rte, yte))
-            # инвариантность: то же после преобразования R -> A R A^T
+            # invariance: the same after the transformation R -> A R A^T
             A = rng.standard_normal((h, h)) + 2.0 * np.eye(h)
             RtrA = np.array([A @ X @ A.T for X in Rtr]); RteA = np.array([A @ X @ A.T for X in Rte])
             FtrA, FteA, _ = feats_tsm(RtrA, RteA)
@@ -224,30 +221,30 @@ def experiment_radius(h=8, n_train=100, n_test=500, seeds=10,
 
 def plot_radius(rows, path):
     rho = np.array([r["rho_max"] for r in rows])
-    xlab = r"радиус облака $\rho = \max_i \delta_{\mathcal{R}}(\bar{\mathbf{R}}, \mathbf{R}_i)$"
+    xlab = r"cloud radius $\rho = \max_i \delta_{\mathcal{R}}(\bar{\mathbf{R}}, \mathbf{R}_i)$"
     fig, (a1, a2) = plt.subplots(1, 2, figsize=(6.4, 2.9))
     for key, lab, mk in [("tsm", "TSM", "o"), ("mdm", "MDM", "s"),
                          ("logeuc", "log-Euclidean", "^"), ("euc", "Euclidean", "v")]:
         m = np.array([r[key] for r in rows]); sd = np.array([r[key + "_std"] for r in rows])
         a1.errorbar(rho, m, yerr=sd, marker=mk, capsize=2, label=lab)
-    a1.set_xlabel(xlab); a1.set_ylabel("точность на тестовой выборке"); a1.set_title("(а)")
+    a1.set_xlabel(xlab); a1.set_ylabel("test accuracy"); a1.set_title("(a)")
     a1.set_ylim(0.45, 1.02); a1.legend(loc="lower right")
     rr = np.linspace(0.9 * rho.min(), 1.02 * rho.max(), 200)
-    a2.plot(rr, c_rho(rr), "k--", label=r"граница $c(\rho)$")
-    a2.plot(rho, [r["c_omega"] for r in rows], "k-.", marker="x", label=r"граница $g(\omega)$")
-    for key, lab, mk in [("ratio_max", "максимум по парам", "o"),
-                         ("ratio_q99", "99-й процентиль", "^"),
-                         ("ratio_med", "медиана по парам", "s")]:
+    a2.plot(rr, c_rho(rr), "k--", label=r"bound $c(\rho)$")
+    a2.plot(rho, [r["c_omega"] for r in rows], "k-.", marker="x", label=r"bound $g(\omega)$")
+    for key, lab, mk in [("ratio_max", "maximum over pairs", "o"),
+                         ("ratio_q99", "99th percentile", "^"),
+                         ("ratio_med", "median over pairs", "s")]:
         m = np.array([r[key] for r in rows]); sd = np.array([r[key + "_std"] for r in rows])
         a2.errorbar(rho, m, yerr=sd, marker=mk, capsize=2, label=lab)
-    a2.set_yscale("log"); a2.set_xlabel(xlab); a2.set_title("(б)")
+    a2.set_yscale("log"); a2.set_xlabel(xlab); a2.set_title("(b)")
     a2.set_ylabel(r"$\delta_{\mathcal{R}}(\mathbf{R}_i, \mathbf{R}_j)\,/\,\|\mathbf{p}_i - \mathbf{p}_j\|_2$")
     a2.legend(loc="upper left")
     fig.tight_layout(w_pad=1.5); savefig(fig, path); plt.close(fig)
 # ---------------------------------------------------------------- experiment 1a
 def experiment_sharpness(h=2, rho_list=(1.0, 2.0, 4.0), thetas=np.logspace(-3, np.log10(np.pi / 2), 40)):
-    """Пара S(+-theta/2) = Q D Q^T, D = diag(rho/sqrt2, -rho/sqrt2, 0, ...): норма rho и
-    разброс sqrt2*rho не зависят от theta; отношение delta_R/||p_i-p_j|| -> c(rho) при theta -> 0."""
+    """Pair S(+-theta/2) = Q D Q^T with D = diag(rho/sqrt2, -rho/sqrt2, 0, ...): the norm rho and the spread
+    sqrt2*rho do not depend on theta, and delta_R/||p_i-p_j|| -> c(rho) as theta -> 0."""
     def rot(th):
         Q = np.eye(h); Q[0, 0] = Q[1, 1] = np.cos(th); Q[0, 1] = -np.sin(th); Q[1, 0] = np.sin(th)
         return Q
@@ -270,10 +267,10 @@ def plot_sharpness(out, path):
         col = "C%d" % k
         ax.plot(r["theta"], r["ratio"], color=col, label=r"$\rho = %g$" % float(rho))
         ax.axhline(r["c_rho"], ls="--", lw=0.9, color=col)
-    ax.set_xscale("log"); ax.set_xlabel(r"угол поворота собственного базиса $\theta$")
+    ax.set_xscale("log"); ax.set_xlabel(r"rotation angle of the eigenbasis $\theta$")
     ax.set_ylabel(r"$\delta_{\mathcal{R}}(\mathbf{R}_i, \mathbf{R}_j)\,/\,\|\mathbf{p}_i - \mathbf{p}_j\|_2$")
     hs, ls = ax.get_legend_handles_labels()
-    hs.append(Line2D([0], [0], ls="--", lw=0.9, color="gray")); ls.append(r"граница $c(\rho)$")
+    hs.append(Line2D([0], [0], ls="--", lw=0.9, color="gray")); ls.append(r"bound $c(\rho)$")
     ax.legend(hs, ls, loc="center left")
     fig.tight_layout(); savefig(fig, path); plt.close(fig)
 # ---------------------------------------------------------------- experiment 2
@@ -296,14 +293,14 @@ def experiment_noise(h_list=(8, 16), s=0.5, n_train=100, n_test=500, seeds=10,
                 Ftr, Fte, _ = feats_tsm(Rtr_h, Rte_h)
                 accs.append(lr_acc(Ftr, ytr, Fte, yte))
                 errs.append(np.mean([geo_dist(Xh, X) for Xh, X in zip(Rte_h[:100], Rte[:100])]))
-            # оценка теоремы при уровне доверия 0.95
+            # bound of the theorem at confidence level 0.95
             t = np.sqrt(2.0 * np.log(2.0 / 0.05) / T); eps = np.sqrt(h / T) + t
             bound = 2 * np.sqrt(h) * eps / (1 - eps) if eps < 1 else np.nan
             rows.append({"T": T, "acc": float(np.mean(accs)), "acc_std": float(np.std(accs)),
                          "err": float(np.mean(errs)), "err_std": float(np.std(errs)), "bound": float(bound)})
             print("h=%d T=%d  acc=%.3f  err=%.3f  bound=%.3f" % (h, T, rows[-1]["acc"], rows[-1]["err"], bound), flush=True)
         out[h] = rows
-        # точность при истинных ковариациях для тех же задач (те же seed и порядок генерации)
+        # accuracy with the true covariances on the same problems (same seeds and generation order)
         vals = []
         for seed in range(seeds):
             rng = np.random.default_rng(100 + seed)
@@ -322,13 +319,13 @@ def plot_noise(out, acc_true, path):
                     marker="o", capsize=2, label=r"$h = %d$" % int(h))
         a1.axhline(acc_true[h], ls=":", color=col)
         a2.errorbar(T, [r["err"] for r in rows], yerr=[r["err_std"] for r in rows], color=col,
-                    marker="o", capsize=2, label=r"$h = %d$: эмпирическая ошибка" % int(h))
-        a2.plot(T, [r["bound"] for r in rows], "--", color=col, label=r"$h = %d$: граница теоремы" % int(h))
+                    marker="o", capsize=2, label=r"$h = %d$: empirical error" % int(h))
+        a2.plot(T, [r["bound"] for r in rows], "--", color=col, label=r"$h = %d$: bound of the theorem" % int(h))
     hs, ls = a1.get_legend_handles_labels()
-    hs.append(Line2D([0], [0], ls=":", color="gray")); ls.append("истинные ковариации")
-    a1.set_xscale("log"); a1.set_xlabel(r"число отсчетов $\mathcal{T}$")
-    a1.set_ylabel("точность TSM"); a1.set_title("(а)"); a1.legend(hs, ls, loc="lower right")
-    a2.set_xscale("log"); a2.set_yscale("log"); a2.set_xlabel(r"число отсчетов $\mathcal{T}$"); a2.set_title("(б)")
+    hs.append(Line2D([0], [0], ls=":", color="gray")); ls.append("true covariances")
+    a1.set_xscale("log"); a1.set_xlabel(r"number of samples $\mathcal{T}$")
+    a1.set_ylabel("TSM accuracy"); a1.set_title("(a)"); a1.legend(hs, ls, loc="lower right")
+    a2.set_xscale("log"); a2.set_yscale("log"); a2.set_xlabel(r"number of samples $\mathcal{T}$"); a2.set_title("(b)")
     a2.set_ylabel(r"$\delta_{\mathcal{R}}(\hat{\mathbf{R}}_i, \mathbf{R}_i)$"); a2.legend(loc="upper right")
     fig.tight_layout(w_pad=1.5); savefig(fig, path); plt.close(fig)
 if __name__ == "__main__":

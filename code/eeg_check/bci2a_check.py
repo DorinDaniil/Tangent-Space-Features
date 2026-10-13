@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
-"""Проверка утверждений статьи на стандартной ЭЭГ: BCI Competition IV 2a (BNCI 001-2014), воображение движения
-левой и правой руки, 22 канала, 250 Гц, обучающие сессии A01T..A03T. Для каждого испытуемого:
-  1) инвариантность (теорема 1): случайное невырожденное смешивание каналов A = G + 2I не меняет точность TSM
-     и попарные расстояния между признаками;
-  2) искажение расстояний (теорема 2): отношение геодезического расстояния к евклидову по всем парам проб
-     против границ g(omega) и c(rho); точность TSM, MDM, log-Euclidean, Euclidean (5-кратная кросс-валидация),
-     отдельно при обучении на 20 пробах каждого класса;
-  3) шум оценки ковариации (теорема 3): геодезическое расстояние между ковариацией по первым T' отсчетам пробы
-     и ковариацией по всему окну против sqrt(h(h+1)/T') и границы теоремы при уровне доверия 0.95;
-     точность TSM при коротких окнах.
-Данные: файлы A01T.mat, A02T.mat, A03T.mat (BNCI Horizon 2020, набор 001-2014) в папке bci2a рядом со скриптом;
-зеркало: https://lampx.tugraz.at/~bci/database/001-2014/ . Запуск: python bci2a_check.py"""
+"""Check of the three statements on the BCI Competition IV 2a EEG data set (BNCI 001-2014): left- vs right-hand
+motor imagery, 22 channels, 250 Hz, training sessions A01T-A03T. For each subject:
+  1) invariance: a random nonsingular channel mixing A = G + 2I leaves the TSM accuracy and the pairwise feature
+     distances unchanged;
+  2) distance distortion: the ratio of the geodesic to the Euclidean distance over all pairs of trials against the
+     bounds g(omega) and c(rho); accuracy of TSM, MDM, log-Euclidean and Euclidean features (5-fold cross-validation),
+     also when training on 20 trials per class;
+  3) covariance estimation noise: the geodesic distance between the covariance of the first T' samples of a trial and
+     the covariance of the full window against sqrt(h(h+1)/T') and the bound at confidence level 0.95; TSM accuracy
+     for short windows.
+Data: A01T.mat, A02T.mat, A03T.mat (BNCI Horizon 2020 data set 001-2014) in the folder bci2a next to the script or in
+the folder given by the environment variable BCI2A_DIR; mirror: https://lampx.tugraz.at/~bci/database/001-2014/"""
 import os, sys, json, math, warnings
 import numpy as np
 from scipy.io import loadmat
@@ -24,10 +24,10 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.environ.get("BCI2A_DIR", os.path.join(HERE, "bci2a"))
 for _s in (1, 2, 3):
     if not os.path.isfile(os.path.join(DATA, f"A0{_s}T.mat")):
-        sys.exit(f"нет файла A0{_s}T.mat в {DATA}: скачайте с https://lampx.tugraz.at/~bci/database/001-2014/")
+        sys.exit(f"A0{_s}T.mat not found in {DATA}: download it from https://lampx.tugraz.at/~bci/database/001-2014/")
 SUBJECTS = [1, 2, 3]
 FS = 250
-T0, T1 = 2.5, 6.0                       # окно пробы после начала пробы (подсказка на 2 с), 3,5 с = 875 отсчетов
+T0, T1 = 2.5, 6.0                       # window after the trial onset (cue at 2 s): 3.5 s = 875 samples
 CH22 = ["Fz", "FC3", "FC1", "FCz", "FC2", "FC4", "C5", "C3", "C1", "Cz", "C2", "C4", "C6",
         "CP3", "CP1", "CPz", "CP2", "CP4", "P1", "Pz", "P2", "POz"]
 CENTRAL9 = ["FC1", "FCz", "FC2", "C3", "C1", "Cz", "C2", "C4", "CPz"]
@@ -41,11 +41,11 @@ def load_subject(subj):
     for run in np.atleast_1d(m["data"]):
         y = np.atleast_1d(run.y)
         if y.size == 0:
-            continue                                      # калибровочные записи без проб
+            continue                                      # calibration runs without trials
         Xr = np.asarray(run.X, dtype=float)[:, :22]
         if np.isnan(Xr).any():                              # NaN in raw export -> zero before filtering
             Xr = np.nan_to_num(Xr, nan=0.0)
-        X = sosfiltfilt(SOS, Xr, axis=0)   # (отсчеты, 22 канала ЭЭГ), мкВ
+        X = sosfiltfilt(SOS, Xr, axis=0)   # (samples, 22 EEG channels), microvolts
         art = np.atleast_1d(run.artifacts) if hasattr(run, "artifacts") else np.zeros_like(y)
         for k, (t, c) in enumerate(zip(np.atleast_1d(run.trial), y)):
             if c in (1, 2) and not art[k]:
@@ -117,7 +117,7 @@ for subj in SUBJECTS:
         res[tag] = r
     results[subj] = res
     a, b = res["h22"]["acc"], res["h9"]["acc"]
-    print(f"A0{subj}T: проб {res['n_trials']} ({res['n_per_class']}), T = {res['T']} | h=22: TSM {a['tsm']:.3f} MDM {a['mdm']:.3f} logE {a['logeuc']:.3f} Euc {a['euc']:.3f}"
+    print(f"A0{subj}T: trials {res['n_trials']} ({res['n_per_class']}), T = {res['T']} | h=22: TSM {a['tsm']:.3f} MDM {a['mdm']:.3f} logE {a['logeuc']:.3f} Euc {a['euc']:.3f}"
           f" | h=9: TSM {b['tsm']:.3f} MDM {b['mdm']:.3f} logE {b['logeuc']:.3f} Euc {b['euc']:.3f}", flush=True)
 
 with open(os.path.join(HERE, "bci2a_check_results.json"), "w", encoding="utf-8") as f:
@@ -133,18 +133,18 @@ def mean(path):
     return float(np.mean(vals)), float(np.std(vals))
 
 
-print("\n==== среднее по испытуемым ====")
+print("\n==== mean over subjects ====")
 for tag in ("h22", "h9"):
     print(f"-- {tag}")
     for m in ("tsm", "mdm", "logeuc", "euc"):
         mu, sd = mean((tag, "acc", m)); mu2, _ = mean((tag, "acc_20", m))
-        print(f"   точность {m:7s}: {mu:.3f} ± {sd:.3f} | при 20 пробах на класс: {mu2:.3f}")
-    mu, sd = mean((tag, "acc_affine_tsm")); print(f"   TSM после смешивания A: {mu:.3f} ± {sd:.3f}")
-    print("   макс. относит. изменение попарных расстояний после A: %.1e" % max(s[tag]["affine_dist_relerr"] for s in results.values()))
+        print(f"   accuracy {m:7s}: {mu:.3f} +- {sd:.3f} | with 20 trials per class: {mu2:.3f}")
+    mu, sd = mean((tag, "acc_affine_tsm")); print(f"   TSM after mixing by A: {mu:.3f} +- {sd:.3f}")
+    print("   max relative change of pairwise distances after A: %.1e" % max(s[tag]["affine_dist_relerr"] for s in results.values()))
     for k in ("rho", "c_rho", "omega", "g_omega", "ratio_min", "ratio_med", "ratio_q99", "ratio_max"):
-        mu, sd = mean((tag, k)); print(f"   {k:10s}: {mu:.3g} ± {sd:.2g}")
-    print("   попарная граница g(max(omega_i, omega_j)) выполнена у всех пар:", all(s[tag]["pairwise_bound_ok"] for s in results.values()))
-    print("   шум оценки: T' | ошибка | sqrt(h(h+1)/T') | ошибка/iid | граница 0.95 | точность TSM")
+        mu, sd = mean((tag, k)); print(f"   {k:10s}: {mu:.3g} +- {sd:.2g}")
+    print("   pairwise bound g(max(omega_i, omega_j)) holds for all pairs:", all(s[tag]["pairwise_bound_ok"] for s in results.values()))
+    print("   estimation noise: T' | error | sqrt(h(h+1)/T') | error/iid | bound 0.95 | TSM accuracy")
     for k in range(5):
         e, _ = mean((tag, "noise", k, "err")); a, _ = mean((tag, "noise", k, "acc_tsm"))
         n0 = results[SUBJECTS[0]][tag]["noise"][k]

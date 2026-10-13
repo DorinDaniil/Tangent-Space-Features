@@ -1,4 +1,4 @@
-"""Перерисовывает графики из results.json без повторного запуска экспериментов."""
+"""Redraw the figures from results.json without rerunning the experiments."""
 import json, os, sys
 here = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, here)

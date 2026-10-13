@@ -311,7 +311,7 @@ def experiment_noise(h_list=(8, 16), s=0.5, n_train=100, n_test=500, seeds=10,
     return out, acc_true
 
 def plot_noise(out, acc_true, path):
-    fig, (a1, a2) = plt.subplots(1, 2, figsize=(6.4, 2.9))
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(6.4, 3.4))   # taller by the height of the legends below the panels
     for k, (h, rows) in enumerate(out.items()):
         col = "C%d" % k
         T = np.array([r["T"] for r in rows])
@@ -319,14 +319,21 @@ def plot_noise(out, acc_true, path):
                     marker="o", capsize=2, label=r"$h = %d$" % int(h))
         a1.axhline(acc_true[h], ls=":", color=col)
         a2.errorbar(T, [r["err"] for r in rows], yerr=[r["err_std"] for r in rows], color=col,
-                    marker="o", capsize=2, label=r"$h = %d$: empirical error" % int(h))
-        a2.plot(T, [r["bound"] for r in rows], "--", color=col, label=r"$h = %d$: bound of the theorem" % int(h))
+                    marker="o", capsize=2)
+        a2.plot(T, [r["bound"] for r in rows], "--", color=col)
+    # legends below the panels: the colour encodes h, the line style encodes the quantity
     hs, ls = a1.get_legend_handles_labels()
     hs.append(Line2D([0], [0], ls=":", color="gray")); ls.append("true covariances")
     a1.set_xscale("log"); a1.set_xlabel(r"number of samples $\mathcal{T}$")
-    a1.set_ylabel("TSM accuracy"); a1.set_title("(a)"); a1.legend(hs, ls, loc="lower right")
+    a1.set_ylabel("TSM accuracy"); a1.set_title("(a)")
+    a1.legend(hs, ls, loc="upper center", bbox_to_anchor=(0.5, -0.27), ncol=2, frameon=False)
     a2.set_xscale("log"); a2.set_yscale("log"); a2.set_xlabel(r"number of samples $\mathcal{T}$"); a2.set_title("(b)")
-    a2.set_ylabel(r"$\delta_{\mathcal{R}}(\hat{\mathbf{R}}_i, \mathbf{R}_i)$"); a2.legend(loc="upper right")
+    a2.set_ylabel(r"$\delta_{\mathcal{R}}(\hat{\mathbf{R}}_i, \mathbf{R}_i)$")
+    hs2 = [Line2D([0], [0], color="C%d" % k, marker="o") for k in range(len(out))]
+    ls2 = [r"$h = %d$" % int(h) for h in out]
+    hs2 += [Line2D([0], [0], color="gray", marker="o"), Line2D([0], [0], ls="--", color="gray")]
+    ls2 += ["empirical error", "bound of the theorem"]
+    a2.legend(hs2, ls2, loc="upper center", bbox_to_anchor=(0.5, -0.27), ncol=2, frameon=False)
     fig.tight_layout(w_pad=1.5); savefig(fig, path); plt.close(fig)
 if __name__ == "__main__":
     t0 = time.time()

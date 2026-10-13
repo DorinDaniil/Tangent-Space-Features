@@ -3,7 +3,7 @@
 
 [Daniil Dorin](https://github.com/DorinDaniil)<sup>1 :email:</sup>
 
-<sup>1</sup> Moscow Institute of Physics and Technology, Moscow, Russia
+<sup>1</sup> Moscow Independent Research Institute of Artificial Intelligence (MIRAI), Moscow, Russia
 
 <sup>:email:</sup> Corresponding author
 

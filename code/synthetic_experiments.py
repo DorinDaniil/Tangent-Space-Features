@@ -237,7 +237,7 @@ def plot_radius(rows, path):
                          ("ratio_med", "median", "s")]:
         m = np.array([r[key] for r in rows]); sd = np.array([r[key + "_std"] for r in rows])
         a2.errorbar(rho, m, yerr=sd, marker=mk, capsize=2, label=lab)
-    a2.set_yscale("log"); a2.set_xlabel(xlab); a2.set_title("(b)")
+    a2.set_ylim(0.95, 3.2); a2.set_xlabel(xlab); a2.set_title("(b)")
     a2.set_ylabel(r"$\delta_{\mathcal{R}}(\mathbf{R}_i, \mathbf{R}_j)\,/\,\|\mathbf{p}_i - \mathbf{p}_j\|_2$")
     a2.legend(loc="upper center", bbox_to_anchor=(0.5, -0.27), ncol=3, frameon=False, columnspacing=1.0, handlelength=1.6)
     fig.tight_layout(w_pad=1.5); savefig(fig, path); plt.close(fig)

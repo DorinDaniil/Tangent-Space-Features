@@ -222,24 +222,24 @@ def experiment_radius(h=8, n_train=100, n_test=500, seeds=10,
 def plot_radius(rows, path):
     rho = np.array([r["rho_max"] for r in rows])
     xlab = r"cloud radius $\rho = \max_i \delta_{\mathcal{R}}(\bar{\mathbf{R}}, \mathbf{R}_i)$"
-    fig, (a1, a2) = plt.subplots(1, 2, figsize=(6.4, 2.9))
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(6.4, 3.4))
     for key, lab, mk in [("tsm", "TSM", "o"), ("mdm", "MDM", "s"),
                          ("logeuc", "log-Euclidean", "^"), ("euc", "Euclidean", "v")]:
         m = np.array([r[key] for r in rows]); sd = np.array([r[key + "_std"] for r in rows])
         a1.errorbar(rho, m, yerr=sd, marker=mk, capsize=2, label=lab)
     a1.set_xlabel(xlab); a1.set_ylabel("test accuracy"); a1.set_title("(a)")
-    a1.set_ylim(0.45, 1.02); a1.legend(loc="lower right")
+    a1.set_ylim(0.45, 1.02); a1.legend(loc="upper center", bbox_to_anchor=(0.5, -0.27), ncol=2, frameon=False)
     rr = np.linspace(0.9 * rho.min(), 1.02 * rho.max(), 200)
     a2.plot(rr, c_rho(rr), "k--", label=r"bound $c(\rho)$")
     a2.plot(rho, [r["c_omega"] for r in rows], "k-.", marker="x", label=r"bound $g(\omega)$")
-    for key, lab, mk in [("ratio_max", "maximum over pairs", "o"),
+    for key, lab, mk in [("ratio_max", "maximum", "o"),
                          ("ratio_q99", "99th percentile", "^"),
-                         ("ratio_med", "median over pairs", "s")]:
+                         ("ratio_med", "median", "s")]:
         m = np.array([r[key] for r in rows]); sd = np.array([r[key + "_std"] for r in rows])
         a2.errorbar(rho, m, yerr=sd, marker=mk, capsize=2, label=lab)
     a2.set_yscale("log"); a2.set_xlabel(xlab); a2.set_title("(b)")
     a2.set_ylabel(r"$\delta_{\mathcal{R}}(\mathbf{R}_i, \mathbf{R}_j)\,/\,\|\mathbf{p}_i - \mathbf{p}_j\|_2$")
-    a2.legend(loc="upper left")
+    a2.legend(loc="upper center", bbox_to_anchor=(0.5, -0.27), ncol=3, frameon=False, columnspacing=1.0, handlelength=1.6)
     fig.tight_layout(w_pad=1.5); savefig(fig, path); plt.close(fig)
 # ---------------------------------------------------------------- experiment 1a
 def experiment_sharpness(h=2, rho_list=(1.0, 2.0, 4.0), thetas=np.logspace(-3, np.log10(np.pi / 2), 40)):

@@ -111,7 +111,7 @@ def plot_style():
                                    r"\usepackage[russian]{babel}", r"\usepackage{amsmath,amssymb}"]),
         "font.family": "serif", "font.size": 10, "axes.labelsize": 10, "axes.titlesize": 10,
         "legend.fontsize": 8.5, "xtick.labelsize": 9, "ytick.labelsize": 9,
-        "lines.linewidth": 1.2, "lines.markersize": 4, "axes.grid": True, "grid.alpha": 0.3,
+        "lines.linewidth": 0.9, "lines.markersize": 3, "axes.grid": True, "grid.alpha": 0.3,
         "legend.framealpha": 0.9, "legend.edgecolor": "0.8",
     })
 
@@ -228,7 +228,7 @@ def plot_radius(rows, path):
         m = np.array([r[key] for r in rows]); sd = np.array([r[key + "_std"] for r in rows])
         a1.errorbar(rho, m, yerr=sd, marker=mk, capsize=2, label=lab)
     a1.set_xlabel(xlab); a1.set_ylabel("test accuracy"); a1.set_title("(a)")
-    a1.set_ylim(0.45, 1.02); a1.legend(loc="upper center", bbox_to_anchor=(0.5, -0.27), ncol=2, frameon=False)
+    a1.set_ylim(0.65, 1.0); a1.legend(loc="upper center", bbox_to_anchor=(0.5, -0.27), ncol=2, frameon=False)
     rr = np.linspace(0.9 * rho.min(), 1.02 * rho.max(), 200)
     a2.plot(rr, c_rho(rr), "k--", label=r"bound $c(\rho)$")
     a2.plot(rho, [r["c_omega"] for r in rows], "k-.", marker="x", label=r"bound $g(\omega)$")

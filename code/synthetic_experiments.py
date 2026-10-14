@@ -326,7 +326,7 @@ def plot_noise(out, acc_true, path):
     hs.append(Line2D([0], [0], ls=":", color="gray")); ls.append("true covariances")
     a1.set_xscale("log"); a1.set_xlabel(r"number of samples $\mathcal{T}$")
     a1.set_ylabel("TSM accuracy"); a1.set_title("(a)")
-    a1.legend(hs, ls, loc="upper center", bbox_to_anchor=(0.5, -0.27), ncol=2, frameon=False)
+    a1.legend(hs, ls, loc="upper center", bbox_to_anchor=(0.5, -0.27), ncol=3, frameon=False)
     a2.set_xscale("log"); a2.set_yscale("log"); a2.set_xlabel(r"number of samples $\mathcal{T}$"); a2.set_title("(b)")
     a2.set_ylabel(r"$\delta_{\mathcal{R}}(\hat{\mathbf{R}}_i, \mathbf{R}_i)$")
     hs2 = [Line2D([0], [0], color="C%d" % k, marker="o") for k in range(len(out))]

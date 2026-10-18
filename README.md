@@ -1,5 +1,5 @@
 <div align="center">
-<h1>Explicit Bounds for Tangent-Space Features of Covariance Matrices of Multivariate Time Series</h1>
+<h1>Explicit Bounds for Tangent-Space Covariance Features of Multivariate Time Series</h1>
 
 [Daniil Dorin](https://github.com/DorinDaniil)<sup>1 :email:</sup>
 
@@ -22,7 +22,7 @@ The repository is structured as follows:
   - `synthetic_experiments.py`: matrix tools, the four classifiers (TSM, MDM, log-Euclidean, Euclidean) and the three synthetic experiments (cloud radius, sharpness of the constant, covariance estimation noise); writes `results.json` and the figures of the paper to a `figs` folder created at the repository root.
   - `replot.py`: redraws the figures from `results.json` without rerunning the experiments.
   - `synthetic_experiments.ipynb`: the same experiments as a notebook.
-  - `eeg_check/bci2a_check.py`: the check of the three theorems on the public EEG dataset BCI Competition IV 2a (left vs right hand motor imagery, 22 channels, 250 Hz); `bci2a_check_results.json` contains the results reported in the paper.
+  - `eeg_check/bci2a_check.py`: the check of the three theorems on the public EEG dataset BCI Competition IV 2a (left vs right hand motor imagery, 22 channels, 250 Hz); `bci2a_check_results.json` contains the results reported in the paper; `eeg_check/plot_eeg_en.py` draws the EEG figure of the paper from these results.
 
 ```shell
 Tangent-Space-Features
@@ -36,6 +36,7 @@ Tangent-Space-Features
     ├── results.json
     └── eeg_check
         ├── bci2a_check.py
+        ├── plot_eeg_en.py
         └── bci2a_check_results.json
 ```
 
@@ -54,7 +55,7 @@ python code/eeg_check/bci2a_check.py
 The paper is under review; the citation will be updated upon publication.
 ```BibTeX
 @article{dorin2026tangent,
-  title={Explicit bounds for tangent-space features of covariance matrices of multivariate time series},
+  title={Explicit bounds for tangent-space covariance features of multivariate time series},
   author={Dorin, Daniil},
   year={2026}
 }

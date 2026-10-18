@@ -332,7 +332,7 @@ def plot_noise(out, acc_true, path):
     hs2 = [Line2D([0], [0], color="C%d" % k, marker="o") for k in range(len(out))]
     ls2 = [r"$h = %d$" % int(h) for h in out]
     hs2 += [Line2D([0], [0], color="gray", marker="o"), Line2D([0], [0], ls="--", color="gray")]
-    ls2 += ["empirical error", "bound of the theorem"]
+    ls2 += ["empirical error", r"theorem bound, $\alpha = 0.05$"]
     a2.legend(hs2, ls2, loc="upper center", bbox_to_anchor=(0.5, -0.27), ncol=2, frameon=False)
     fig.tight_layout(w_pad=1.5); savefig(fig, path); plt.close(fig)
 if __name__ == "__main__":
